@@ -37,23 +37,93 @@ namespace not_hibernating
 
         private void CheckBox2_Click(object sender, EventArgs e)
         {
-            if (checkBoxSleepPrevention.Checked)
-            {
-                label1.Text = "Prevent system from sleeping";
-                //设定不休眠
-                SleepPrevention.PreventSleep(true);
-                SaveConfig();
-            }
-            else
-            {
-                SleepPrevention.RestoreSleep();
-                label1.Text = "Allow system to sleep...";
-                SaveConfig();
-            }
+            SetSleepPreventionFlag();
 
         }
 
         private void CheckBox1_Click(object sender, EventArgs e)
+        {
+            SetAutoStartFlag();
+        }
+
+        private void OpenWindowsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // 显示窗体并激活它
+            this.WindowState = FormWindowState.Normal;
+            this.Show();
+            this.Activate();
+
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            // MessageBox.Show($"{msg}", "Welcome to the tool", MessageBoxButtons.OK,MessageBoxIcon.Information);
+            label1.Text = "Welcome to the tool";
+            LoadConfig();
+        }
+
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SleepPrevention.RestoreSleep();
+            Environment.Exit(Environment.ExitCode);
+        }
+
+        /// <summary>
+        /// 保存配方
+        /// </summary>
+        public void SaveConfig()
+        {
+            try
+            {
+                var config = new ConfigBasic();
+                config.AutoStartFlag = checkBoxAutoStartup.Checked;
+                config.EnableFlag = checkBoxSleepPrevention.Checked;
+                var jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
+                if (File.Exists($@"{runPath}\{ProConfig}"))
+                {
+                    File.Delete($@"{runPath}\{ProConfig}");
+                }
+                File.WriteAllText($@"{runPath}\{ProConfig}", jsonString);
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+
+
+        }
+
+        /// <summary>
+        /// 加载配置
+        /// </summary>
+
+        public void LoadConfig()
+        {
+            try
+            {
+                if (File.Exists($@"{runPath}\{ProConfig}"))
+                {
+                    var ConfigString = File.ReadAllText($@"{runPath}\{ProConfig}");
+                    var config = JsonConvert.DeserializeObject<ConfigBasic>(ConfigString);
+                    this.checkBoxAutoStartup.Checked = config.AutoStartFlag;
+                    this.checkBoxSleepPrevention.Checked = config.EnableFlag;
+                    SetSleepPreventionFlag();
+                    SetAutoStartFlag();
+                }
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+        }
+
+        /// <summary>
+        /// 设定开机自启动
+        /// </summary>
+        public void SetAutoStartFlag()
         {
             if (checkBoxAutoStartup.Checked)
             {
@@ -77,70 +147,24 @@ namespace not_hibernating
             }
         }
 
-        private void OpenWindowsToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 设定休眠
+        /// </summary>
+        public void SetSleepPreventionFlag()
         {
-            // 显示窗体并激活它
-            // this.WindowState = FormWindowState.Normal;
-            this.Show();
-            this.Activate();
-
-        }
-
-        private void FrmMain_Load(object sender, EventArgs e)
-        {
-            // MessageBox.Show($"{msg}", "Welcome to the tool", MessageBoxButtons.OK,MessageBoxIcon.Information);
-            label1.Text = "Welcome to the tool";
-            LoadConfig();
-        }
-
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SleepPrevention.RestoreSleep();
-            Environment.Exit(Environment.ExitCode);
-        }
-
-        public void SaveConfig()
-        {
-            try
+            if (checkBoxSleepPrevention.Checked)
             {
-                var config = new ConfigBasic();
-                config.AutoStartFlag = checkBoxAutoStartup.Checked;
-                config.EnableFlag = checkBoxSleepPrevention.Checked;
-                var jsonString= JsonConvert.SerializeObject(config,Formatting.Indented);
-                if(File.Exists($@"{runPath}\{ProConfig}"))
-                {
-                    File.Delete($@"{runPath}\{ProConfig}");
-                }
-                File.WriteAllText($@"{runPath}\{ProConfig}", jsonString );
+                label1.Text = "Prevent system from sleeping";
+                //设定不休眠
+                SleepPrevention.PreventSleep(true);
+                SaveConfig();
             }
-            catch (Exception ex)
+            else
             {
-
-                MessageBox.Show(ex.Message);
+                SleepPrevention.RestoreSleep();
+                label1.Text = "Allow system to sleep...";
+                SaveConfig();
             }
-
-
-        }
-
-        public void LoadConfig()
-        {
-            try
-            {
-                if (File.Exists($@"{runPath}\{ProConfig}"))
-                {
-                    var ConfigString = File.ReadAllText($@"{runPath}\{ProConfig}");
-                    var config = JsonConvert.DeserializeObject<ConfigBasic>(ConfigString);
-                    this.checkBoxAutoStartup.Checked=config.AutoStartFlag;
-                    this.checkBoxSleepPrevention.Checked = config.EnableFlag;
-                    SaveConfig();
-                }
-            }
-            catch (Exception)
-            {
-
-               
-            }
-
         }
     }
 }
