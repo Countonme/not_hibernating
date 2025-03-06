@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using not_hibernating.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,18 +14,72 @@ namespace not_hibernating
 {
     public partial class FrmMain : Form
     {
+        public   RegistryKey key = Registry.CurrentUser.OpenSubKey(ProgramBasic.RunKay, true);
         public const string msg = "The program is already running!, The small icon in the bottom right corner allows you to view the process";
         public FrmMain()
         {
             InitializeComponent();
             this.exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
+            this.openWindowsToolStripMenuItem.Click += OpenWindowsToolStripMenuItem_Click;
             this.Load += FrmMain_Load;
-            
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.checkBoxAutoStartup.Click += CheckBox1_Click;
+            this.checkBoxSleepPrevention.Click += CheckBox2_Click;    
+        }
+
+        private void CheckBox2_Click(object sender, EventArgs e)
+        {
+            if (checkBoxSleepPrevention.Checked)
+            {
+                label1.Text = "Prevent system from sleeping";
+                //设定不休眠
+                SleepPrevention.PreventSleep(true);
+
+            }
+            else
+            {
+                SleepPrevention.RestoreSleep();
+                label1.Text = "Allow system to sleep...";
+
+            }
+
+        }
+
+        private void CheckBox1_Click(object sender, EventArgs e)
+        {
+            if (checkBoxAutoStartup.Checked)
+            {
+                label1.Text = "Turn on auto startup ";
+                // 检查是否需要添加到开机自启动项
+                if (key.GetValue(ProgramBasic.ProgramName) == null)
+                {
+                    key.SetValue(ProgramBasic.ProgramName, Application.ExecutablePath.ToString());
+                    //key.DeleteValue(AppName);
+                }
+            }
+            else 
+            {
+                label1.Text = "Turn off auto startup ";
+                if (!(key.GetValue(ProgramBasic.ProgramName) is null))
+                { 
+                    key.DeleteValue(ProgramBasic.ProgramName);
+                }
+            }
+        }
+
+        private void OpenWindowsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // 显示窗体并激活它
+            // this.WindowState = FormWindowState.Normal;
+            this.Show();
+            this.Activate();
+
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            MessageBox.Show($"{msg}", "Welcome to the tool", MessageBoxButtons.OK,MessageBoxIcon.Information);
+           // MessageBox.Show($"{msg}", "Welcome to the tool", MessageBoxButtons.OK,MessageBoxIcon.Information);
+           label1.Text = "Welcome to the tool";
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)

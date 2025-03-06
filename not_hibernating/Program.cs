@@ -1,4 +1,5 @@
-﻿using System;
+﻿using not_hibernating.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace not_hibernating
         static void Main()
         {
 
-            var mutex =new Mutex(true, "WinHibernating", out bool createdNew);
+            var mutex =new Mutex(true, ProgramBasic.ProgramName, out bool createdNew);
             if (!createdNew)
             {
                 // 如果创建mutex失败，表示已经有实例在运行
@@ -30,7 +31,7 @@ namespace not_hibernating
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             //设定不休眠
-            SleepPrevention.PreventSleep(true);
+            // SleepPrevention.PreventSleep(true);
            
             Application.Run(new FrmMain());
           
